@@ -28,6 +28,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Locale;
+
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import android.util.Log;
@@ -458,14 +460,16 @@ public class RpcClient {
 
 	/**
 	 * Performs get_message_count RPC towards BOINC client
-	 * 
+	 * Returns highest seqNo
 	 * @return result of RPC call in case of success, null otherwise
 	 */
 	public synchronized int getMessageCount() {
 		mLastErrorMessage = null;
 		try {
 			sendRequest("<get_message_count/>\n");
-			return MessageCountParser.getSeqno(receiveReply());
+			int seqNo = MessageCountParser.getSeqno(receiveReply());
+			if(Logging.DEBUG) Log.d(Logging.TAG,"RpcClient.getMessageCount returning: " + seqNo);
+			return seqNo;
 		}
 		catch (IOException e) {
 			if(Logging.WARNING) Log.w(Logging.TAG, "error in getMessageCount()", e);
@@ -475,7 +479,7 @@ public class RpcClient {
 
 	/**
 	 * Performs get_messages RPC towards BOINC client
-	 * 
+	 * Returns client messages that are more recent than seqNo param
 	 * @return result of RPC call in case of success, null otherwise
 	 */
 	public synchronized ArrayList<Message> getMessages(int seqNo) {
@@ -598,7 +602,9 @@ public class RpcClient {
 		mRequest.append(deviceStatus.getBattery_temperature_celcius());
 		mRequest.append("</battery_temperature_celsius>\n  <wifi_online>");
 		mRequest.append(deviceStatus.isWifi_online() ? 1 : 0);
-		mRequest.append("</wifi_online>\n </device_status>\n</report_device_status>\n");
+		mRequest.append("</wifi_online>\n  <user_active>");
+		mRequest.append(deviceStatus.isUser_active() ? 1 : 0);
+		mRequest.append("</user_active>\n </device_status>\n</report_device_status>\n");
 		try {
 			sendRequest(mRequest.toString());
 			SimpleReplyParser parser = SimpleReplyParser.parse(receiveReply());
@@ -781,9 +787,9 @@ public class RpcClient {
 			mRequest.append("<lookup_account>\n <url>");
 			mRequest.append(accountIn.url);
 			mRequest.append("</url>\n <email_addr>");
-			mRequest.append(id.toLowerCase());
+			mRequest.append(id.toLowerCase(Locale.US));
 			mRequest.append("</email_addr>\n <passwd_hash>");
-			mRequest.append(getPasswdHash(accountIn.passwd, id.toLowerCase()));
+			mRequest.append(getPasswdHash(accountIn.passwd, id.toLowerCase(Locale.US)));
 			mRequest.append("</passwd_hash>\n</lookup_account>\n");
 			sendRequest(mRequest.toString());
 			
@@ -944,7 +950,9 @@ public class RpcClient {
 			mRequest.append(globalPrefs.run_on_batteries ? 1 : 0);
 			mRequest.append("</run_on_batteries>\n  <battery_charge_min_pct>");
 			mRequest.append(globalPrefs.battery_charge_min_pct);
-			mRequest.append("</battery_charge_min_pct>\n  <run_gpu_if_user_active>");
+			mRequest.append("</battery_charge_min_pct>\n  <battery_max_temperature>");
+			mRequest.append(globalPrefs.battery_max_temperature);
+			mRequest.append("</battery_max_temperature>\n  <run_gpu_if_user_active>");
 			mRequest.append(globalPrefs.run_gpu_if_user_active ? 1 : 0);
 			mRequest.append("</run_gpu_if_user_active>\n  <run_if_user_active>");
 			mRequest.append(globalPrefs.run_if_user_active ? 1 : 0);
@@ -1212,6 +1220,59 @@ public class RpcClient {
 		}
 		catch (IOException e) {
 			if(Logging.WARNING) Log.w(Logging.TAG, "error in transferOp()", e);
+			return false;
+		}
+	}
+	
+	public synchronized boolean setCcConfig(String ccConfig) {
+		final String request =
+				"<set_cc_config>\n" +
+						ccConfig + 
+				"\n</set_cc_config>\n";
+			try {
+				sendRequest(request);
+				SimpleReplyParser parser = SimpleReplyParser.parse(receiveReply());
+				if (parser == null)
+					return false;
+				mLastErrorMessage = parser.getErrorMessage();
+				return parser.result();
+			}
+			catch (IOException e) {
+				if(Logging.WARNING) Log.w(Logging.TAG, "error in setRunMode()", e);
+				return false;
+			}
+		
+	}
+	
+	public synchronized String getCcConfig() {
+		//TODO: needs proper parsing
+		try {
+			mRequest.setLength(0);
+			mRequest.append("<get_cc_config/>");
+			
+			sendRequest(mRequest.toString());
+			String reply = receiveReply();
+			Log.d(Logging.TAG, reply);
+			return reply;
+		} catch (IOException e) {
+			if(Logging.WARNING) Log.w(Logging.TAG, "error in getCcConfig()", e);
+			return "";
+		}
+	}
+	
+	public synchronized Boolean readCcConfig() {
+		try {
+			mRequest.setLength(0);
+			mRequest.append("<read_cc_config/>");
+
+			sendRequest(mRequest.toString());
+			SimpleReplyParser parser = SimpleReplyParser.parse(receiveReply());
+			if (parser == null)
+				return false;
+			mLastErrorMessage = parser.getErrorMessage();
+			return parser.result();
+		} catch (IOException e) {
+			if(Logging.WARNING) Log.w(Logging.TAG, "error in readCcConfig()", e);
 			return false;
 		}
 	}

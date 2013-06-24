@@ -51,14 +51,12 @@ public class TransListAdapter extends ArrayAdapter<TransferData> implements OnIt
 	private ArrayList<TransferData> entries;
 	private CcStatus status;
     private Activity activity;
-    private ListView listView;
     
     public TransListAdapter(Activity activity, ListView listView, int textViewResourceId, ArrayList<TransferData> entries, CcStatus status) {
         super(activity, textViewResourceId, entries);
         this.entries = entries;
         this.status = status;
         this.activity = activity;
-        this.listView = listView;
         
         listView.setAdapter(this);
         listView.setOnItemClickListener(this);
@@ -106,7 +104,8 @@ public class TransListAdapter extends ArrayAdapter<TransferData> implements OnIt
 	    }
 	    
 	    if ( 0 == fFileSize ) return 0;
-		return (int)Math.round(dBuffer);
+	    int progress = (int)Math.round(dBuffer);
+		return progress;
 	}
 
 	public String getStatus(int position) {
@@ -155,11 +154,26 @@ public class TransListAdapter extends ArrayAdapter<TransferData> implements OnIt
     
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-	    View v = convertView;
 
-	    LayoutInflater vi = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	    v = vi.inflate(R.layout.trans_layout_listitem, null);
-	    v.setOnClickListener(entries.get(position).transClickListener);
+		TransferData listItem = entries.get(position);
+
+		View v = convertView;
+		// setup new view, if:
+		// - view is null, has not been here before
+		// - view has different id
+		Boolean setup = false;
+		if(v == null) setup = true;
+		else {
+			String viewId = (String)v.getTag();
+			if(!listItem.id.equals(viewId)) setup = true;
+		}
+		
+		if(setup){
+		    LayoutInflater li = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		    v = li.inflate(R.layout.trans_layout_listitem, null);
+		    v.setOnClickListener(entries.get(position).transClickListener);
+		    v.setTag(listItem.id);
+		}
 	    
 	    ImageView ivIcon = (ImageView)v.findViewById(R.id.projectIcon);
 	    Bitmap icon = getIcon(position);
@@ -171,11 +185,8 @@ public class TransListAdapter extends ArrayAdapter<TransferData> implements OnIt
 	    }
 	    
 	    TextView transferName = (TextView)v.findViewById(R.id.transName);
-	    TextView transferProgress = (TextView)v.findViewById(R.id.transProgress);
 	    ProgressBar progressBar = (ProgressBar)v.findViewById(R.id.progressBar);
 	    TextView statusText = (TextView)v.findViewById(R.id.transStatus);
-	    
-	    TransferData listItem = entries.get(position);
 	    
 	    progressBar.setIndeterminate(false);
 	    progressBar.setProgressDrawable(this.activity.getResources()
@@ -183,7 +194,6 @@ public class TransListAdapter extends ArrayAdapter<TransferData> implements OnIt
 	    progressBar.setProgress(getProgress(position));
 	    
 	    TextView header = (TextView) v.findViewById(R.id.transHeader);
-	    // TODO: we should be able to get application name for transfers
 	    String headerT = listItem.transfer.project_url;
 	    
 	    ArrayList<Project> projects = Monitor.getClientStatus().getProjects();
@@ -200,18 +210,7 @@ public class TransListAdapter extends ArrayAdapter<TransferData> implements OnIt
 	    
 	    // set project name
 	    String tempProjectName = listItem.transfer.project_url;
-	    
 	    ((TextView) v.findViewById(R.id.projectName)).setText(tempProjectName);
-	    
-	    Float fraction = Float.valueOf((float) 1.0); // default is 100 (e.g. abort show full red progress bar)
-	    if(!listItem.transfer.xfer_active) { //fraction not available
-	    	transferProgress.setVisibility(View.GONE);
-	    	progressBar.setProgress(Math.round(fraction * progressBar.getMax()));
-	    } else { // fraction available
-	    	progressBar.setProgress(getProgress(position));
-	    	transferProgress.setVisibility(View.VISIBLE);
-	    	transferProgress.setText(BOINCUtils.formatSize(getItem(position).transfer.bytes_xferred, getItem(position).transfer.nbytes));
-	    }
 	    
 	    String statusT = determineStatusText(listItem);
 	    statusText.setText(statusT);
@@ -231,9 +230,6 @@ public class TransListAdapter extends ArrayAdapter<TransferData> implements OnIt
 	    		((LinearLayout)v.findViewById(R.id.transButtons)).setVisibility(View.INVISIBLE);
 	    	} else {
 	    		
-	    		ImageView suspendResumeRetry = (ImageView) v.findViewById(R.id.suspendResumeRetryTrans);
-	    		suspendResumeRetry.setOnClickListener(listItem.iconClickListener);
-	    		
 	    		ImageView abortButton = (ImageView) v.findViewById(R.id.abortTrans);
 	    		abortButton.setOnClickListener(listItem.iconClickListener);
 	    		abortButton.setTag(RpcClient.TRANSFER_ABORT); // tag on button specified operation triggered in iconClickListener
@@ -241,16 +237,6 @@ public class TransListAdapter extends ArrayAdapter<TransferData> implements OnIt
 	    		if (listItem.expectedState == -1) { // not waiting for new state
 	    			((LinearLayout)v.findViewById(R.id.requestPendingWrapper)).setVisibility(View.GONE);
 	    			((LinearLayout)v.findViewById(R.id.transButtons)).setVisibility(View.VISIBLE);
-	    			
-	    			// checking what suspendResumeRetry button should be shown
-	    			// TODO: uncomment this block when suspend/resume via gui is supported
-	    			if (listItem.determineState() == TransferData.TRANSFER_FAILED){ // show retry
-	    				suspendResumeRetry.setVisibility(View.VISIBLE);
-	    				suspendResumeRetry.setImageResource(R.drawable.retry);
-	    				suspendResumeRetry.setTag(RpcClient.TRANSFER_RETRY); // tag on button specified operation triggered in iconClickListener
-	    			} else { // show nothing
-	    				suspendResumeRetry.setVisibility(View.GONE);
-	    			}
 	    		} else {
 	    			((LinearLayout)v.findViewById(R.id.transButtons)).setVisibility(View.INVISIBLE);
 	    			((LinearLayout)v.findViewById(R.id.requestPendingWrapper)).setVisibility(View.VISIBLE);
@@ -295,7 +281,7 @@ public class TransListAdapter extends ArrayAdapter<TransferData> implements OnIt
     		if (status.network_suspend_reason > 0) {
     			buf += activity.getResources().getString(R.string.trans_suspended);
     			buf += " - ";
-    			buf += BOINCUtils.translateRPCReason(activity, status.network_suspend_reason);
+    			buf += BOINCUtils.translateNetworkSuspendReason(getContext(), status.network_suspend_reason);
     		} else {
     			if (transfer.xfer_active) {
     				buf += activity.getResources().getString(R.string.trans_active);

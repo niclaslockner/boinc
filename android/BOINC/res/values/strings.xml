@@ -78,21 +78,21 @@
     <string name="attachproject_registration_header_pwd_confirm">&#8230; Retype:</string>
     <string name="attachproject_registration_button">Create</string>
     	<!-- error strings -->
-    <string name="attachproject_error_project_exists">Project is already attached!</string>
-    <string name="attachproject_error_wrong_name">User not found.</string>
-    <string name="attachproject_error_short_pwd">Password too short.</string>
-    <string name="attachproject_error_no_internet">Connection failure.</string>
-    <string name="attachproject_error_pwd_no_match">Passwords do not match.</string>
-    <string name="attachproject_error_no_email">Please enter eMail address.</string>
-    <string name="attachproject_error_no_pwd">Please enter a password.</string>
-    <string name="attachproject_error_no_name">Please enter user name.</string>
-    <string name="attachproject_error_unknown">Unknown failure.</string>
-    <string name="attachproject_error_bad_username">User name refused.</string>
-    <string name="attachproject_error_email_in_use">eMail is already in use.</string>
-    <string name="attachproject_error_project_down">Project is offline.</string>
-    <string name="attachproject_error_email_bad_syntax">eMail refused.</string>
-    <string name="attachproject_error_bad_pwd">Password refused.</string>
-    <string name="attachproject_error_creation_disabled">Account creation is disabled on this project!</string>
+    <string name="attachproject_error_project_exists">Project is already attached</string>
+    <string name="attachproject_error_wrong_name">User not found</string>
+    <string name="attachproject_error_short_pwd">Password too short</string>
+    <string name="attachproject_error_no_internet">Connection failure</string>
+    <string name="attachproject_error_pwd_no_match">Passwords do not match</string>
+    <string name="attachproject_error_no_email">Please enter eMail address</string>
+    <string name="attachproject_error_no_pwd">Please enter a password</string>
+    <string name="attachproject_error_no_name">Please enter user name</string>
+    <string name="attachproject_error_unknown">failed</string>
+    <string name="attachproject_error_bad_username">User name refused</string>
+    <string name="attachproject_error_email_in_use">eMail is already in use</string>
+    <string name="attachproject_error_project_down">Project is offline</string>
+    <string name="attachproject_error_email_bad_syntax">eMail refused</string>
+    <string name="attachproject_error_bad_pwd">Password refused</string>
+    <string name="attachproject_error_creation_disabled">Account creation is disabled on this project</string>
     	<!-- working activity -->
     <string name="attachproject_working_back_button">Back</string>
     <string name="attachproject_working_finish_button">Finish</string>
@@ -139,17 +139,21 @@
 	<string name="prefs_loading">Reading preferences&#8230;</string>
 	<string name="prefs_submit_button">Save</string>
 	<string name="prefs_dialog_title">Enter new value:</string>
+	<string name="prefs_dialog_title_selection">Select:</string>
 	<string name="prefs_category_general">General</string>
 	<string name="prefs_category_network">Network</string>
 	<string name="prefs_category_power">Power</string>
 	<string name="prefs_category_cpu">CPU</string>
 	<string name="prefs_category_storage">Storage</string>
 	<string name="prefs_category_memory">Memory</string>
+	<string name="prefs_category_debug">Debug</string>
 	
 	<string name="prefs_show_advanced_header">Show advanced preferences and controls&#8230;</string>
 	<string name="prefs_run_on_battery_header">Compute on Battery</string>
 	<string name="battery_charge_min_pct_header">Min. battery level</string>
 	<string name="battery_charge_min_pct_description">BOINC suspends computation below defined battery charge level.</string>
+	<string name="battery_temperature_max_header">Max. battery temperature</string>
+	<string name="battery_temperature_max_description">BOINC suspends computation above defined battery temperature.</string>
 	<string name="prefs_disk_max_pct_header">Max. used storage space</string>
 	<string name="prefs_disk_max_pct_description">How many percent of your device\'s storage space is BOINC allowed to use?</string>
 	<string name="prefs_disk_min_free_gb_header">Min. spare storage</string>
@@ -167,12 +171,17 @@
 	<string name="prefs_cpu_time_max_description">Limits the CPU time BOINC uses for computation.</string>
 	<string name="prefs_memory_max_idle_header">RAM limit</string>
 	<string name="prefs_memory_max_idle_description">Limits the amount of RAM tasks are allowed to occupy.</string>
+	<string name="prefs_client_log_flags_header">BOINC Client log flags</string>
+	<string name="prefs_client_log_flags_description">Enables log messages for specified categories.</string>
+	<string name="prefs_gui_log_level_header">GUI log level</string>
+	<string name="prefs_gui_log_level_description">Specifies verbosity of GUI log messages.</string>
 	
 	<string name="prefs_unit_mb">MB</string>
 	<string name="prefs_unit_gb">GB</string>
 	<string name="prefs_unit_pct">%</string>
 	<string name="prefs_unit_cpu">CPU</string>
 	<string name="prefs_unit_cpus">CPUS</string>
+	<string name="prefs_unit_celcius">&#0176;C</string>
 	
 	<!-- projects tab strings -->
 	<string name="projects_loading">Reading projects&#8230;</string>
@@ -200,7 +209,7 @@
 	<string name="projects_control_allownewtasks">Allow new tasks</string>
 	<string name="projects_control_reset">Reset</string>
 		<!-- project confirm dialog -->
-	<string name="projects_confirm_detach_title">Remove project</string>
+	<string name="projects_confirm_detach_title">Remove project?</string>
 	<string name="projects_confirm_detach_message">Are you sure you want to remove</string>
 	<string name="projects_confirm_detach_message2">from BOINC?</string>
 	<string name="projects_confirm_detach_confirm">Remove</string>
@@ -237,7 +246,7 @@
 	<string name="tasks_custom_ready_to_report">ready to report</string>
 
 	<!-- confirmation dialog -->
-	<string name="confirm_abort_task_title">Abort task</string>
+	<string name="confirm_abort_task_title">Abort task?</string>
 	<string name="confirm_abort_task_message">Abort task:</string>
 	<string name="confirm_abort_task_confirm">Abort</string>
 	<string name="confirm_cancel">Cancel</string>
@@ -259,7 +268,7 @@
 	<string name="trans_projectbackoff">project backoff</string>
 	<string name="trans_header_name">File:</string>
 										    
-	<string name="confirm_abort_trans_title">Abort transfer</string>
+	<string name="confirm_abort_trans_title">Abort transfer?</string>
 	<string name="confirm_abort_trans_message">Abort File:</string>
 	<string name="confirm_abort_trans_confirm">Abort</string>
 	
@@ -287,13 +296,14 @@
     <string name="suspend_cpu">Your device is busy with a different application.</string>
     <string name="suspend_network_quota">BOINC reached network transfer limit.</string>
     <string name="suspend_os">Stopped by Android.</string>
-    <string name="suspend_wifi">Can\'t fetch tasks, no WiFi connection!</string>
+    <string name="suspend_wifi">Not connected to WiFi.</string>
     <string name="suspend_battery_charging">Battery needs to charge before resuming computation.</string>
     <string name="suspend_battery_charging_long">Computing will resume when battery charge reaches</string>
     <string name="suspend_battery_charging_long2"></string>
     <string name="suspend_battery_charging_current">currently</string>
     <string name="suspend_battery_overheating">Waiting for battery to cool down</string>
     <string name="suspend_user_req">Resuming computation&#8230;</string>
+    <string name="suspend_network_user_req">manually.</string>
     
     <!-- rpc reasons -->
     <string name="rpcreason_userreq">Requested by user</string>

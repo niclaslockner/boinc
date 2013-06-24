@@ -275,7 +275,7 @@ int CLIENT_STATE::check_suspend_processing() {
     if (device_status.battery_state == BATTERY_STATE_OVERHEATED) {
         return SUSPEND_REASON_BATTERY_OVERHEATED;
     }
-    if (device_status.battery_temperature_celsius > 45) {
+    if (device_status.battery_temperature_celsius > global_prefs.battery_max_temperature) {
         return SUSPEND_REASON_BATTERY_OVERHEATED;
     }
 
@@ -641,6 +641,11 @@ void CLIENT_STATE::read_global_prefs(
     }
     if (!global_prefs.run_if_user_active) {
         msg_printf(NULL, MSG_INFO, "   don't compute while active");
+#ifdef ANDROID
+    } else {
+        msg_printf(NULL, MSG_INFO, "   Android: don't compute while active");
+        global_prefs.run_if_user_active = false;
+#endif
     }
     if (!global_prefs.run_gpu_if_user_active) {
         msg_printf(NULL, MSG_INFO, "   don't use GPU while active");
